@@ -1,0 +1,71 @@
+//====================================================================================
+// Power PMAC Script Forward Kinematic Program (.kin)
+// Folder: "PMAC Script Language\Kinematic Routines"
+//====================================================================================
+Coord[1].SegMoveTime = 2; // 2 msec segmentation period 
+Open forward (1)     // Put Coordinate System number inside "(cs)"
+local rmat11, rmat12, rmat13, rmat21, rmat22, rmat23, rmat31, rmat32, rmat33;//Rotation matrix variables
+if (KinVelEna) callsub 100;
+KinAxisUsed = $1C7; // XYZABC axis results
+N100:
+		//Forward Kinematics Algorithm
+		//position data gather
+		th1=KinPosMotor1*DegPerCt1;
+		th2=KinPosMotor2*DegPerCt2;
+		th3=KinPosMotor3*DegPerCt3;
+		th4=KinPosMotor4*DegPerCt4;
+		th5=KinPosMotor5*DegPerCt5;
+		th6=KinPosMotor6*DegPerCt6;
+		//dh theta
+		ttt1=th1;
+		ttt2=th2+90;
+		ttt3=th3;
+		ttt4=th4-90;
+		ttt5=th5;
+		ttt6=th6+90;
+		//rotationmatrixcalculating
+		RX=dd_2*sind(ttt1) - dd_3*sind(ttt1) + dd_4*sind(ttt1) + dd_6*(cosd(ttt5)*sind(ttt1) + cosd(ttt2 - ttt3 + ttt4)*cosd(ttt1)*sind(ttt5)) - dd_5*sind(ttt2 - ttt3 + ttt4)*cosd(ttt1) + aa_2*cosd(ttt1)*cosd(ttt2) + aa_3*cosd(ttt1)*cosd(ttt2)*cosd(ttt3) + aa_3*cosd(ttt1)*sind(ttt2)*sind(ttt3);
+		RY=dd_3*cosd(ttt1) - dd_2*cosd(ttt1) - dd_4*cosd(ttt1) - dd_5*sind(ttt2 - ttt3 + ttt4)*sind(ttt1) - dd_6*cosd(ttt1)*cosd(ttt5) + aa_2*cosd(ttt2)*sind(ttt1) + dd_6*cosd(ttt2 - ttt3 + ttt4)*sind(ttt1)*sind(ttt5) + aa_3*cosd(ttt2)*cosd(ttt3)*sind(ttt1) + aa_3*sind(ttt1)*sind(ttt2)*sind(ttt3);
+		RZ=dd_1 + aa_2*sind(ttt2) + dd_5*(cosd(ttt2 - ttt3)*cosd(ttt4) - sind(ttt2 - ttt3)*sind(ttt4)) + aa_3*sind(ttt2 - ttt3) + dd_6*sind(ttt5)*(cosd(ttt2 - ttt3)*sind(ttt4) + sind(ttt2 - ttt3)*cosd(ttt4));
+		rmat11=- cosd(ttt6)*(sind(ttt1)*sind(ttt5) - cosd(ttt2 - ttt3 + ttt4)*cosd(ttt1)*cosd(ttt5)) - sind(ttt2 - ttt3 + ttt4)*cosd(ttt1)*sind(ttt6);
+		rmat12=sind(ttt6)*(sind(ttt1)*sind(ttt5) - cosd(ttt2 - ttt3 + ttt4)*cosd(ttt1)*cosd(ttt5)) - sind(ttt2 - ttt3 + ttt4)*cosd(ttt1)*cosd(ttt6);
+		rmat13=cosd(ttt5)*sind(ttt1) + cosd(ttt2 - ttt3 + ttt4)*cosd(ttt1)*sind(ttt5);
+		rmat21=cosd(ttt6)*(cosd(ttt1)*sind(ttt5) + cosd(ttt2 - ttt3 + ttt4)*cosd(ttt5)*sind(ttt1)) - sind(ttt2 - ttt3 + ttt4)*sind(ttt1)*sind(ttt6);
+		rmat22=- sind(ttt6)*(cosd(ttt1)*sind(ttt5) + cosd(ttt2 - ttt3 + ttt4)*cosd(ttt5)*sind(ttt1)) - sind(ttt2 - ttt3 + ttt4)*cosd(ttt6)*sind(ttt1);
+		rmat23=cosd(ttt2 - ttt3 + ttt4)*sind(ttt1)*sind(ttt5) - cosd(ttt1)*cosd(ttt5);
+		rmat31=cosd(ttt2 - ttt3 + ttt4)*sind(ttt6) + sind(ttt2 - ttt3 + ttt4)*cosd(ttt5)*cosd(ttt6);
+		rmat32=cosd(ttt2 - ttt3 + ttt4)*cosd(ttt6) - sind(ttt2 - ttt3 + ttt4)*cosd(ttt5)*sind(ttt6);
+		rmat33=sind(ttt2 - ttt3 + ttt4)*sind(ttt5);
+		
+		RC=atan2d(rmat21,rmat11);
+		RA=atan2d(rmat13*sind(RC)-rmat23*cosd(RC),rmat22*cosd(RC)-rmat12*sind(RC));
+		RB=atan2d(-rmat31,rmat11*cosd(RC)+rmat21*sind(RC));
+		//	%convert matrix to quaternion		
+		qw=(sqrt(1+rmat11+rmat22+rmat33))/2;
+		qx=(rmat32-rmat23)/(4*qw);
+		qy=(rmat13-rmat31)/(4*qw);
+		qz=(rmat21-rmat12)/(4*qw);
+	if(cs==1)
+	{
+		KinPosAxisX=RX;
+		KinPosAxisY=RY;
+		KinPosAxisZ=RZ;
+		KinPosAxisA=RA;
+		KinPosAxisB=RB;
+		KinPosAxisC=RC;
+	}
+	if(cs==0)
+	{
+		KinPosAxisX=th1;
+		KinPosAxisY=th2;
+		KinPosAxisZ=th3;
+		KinPosAxisA=th4;
+		KinPosAxisB=th5;
+		KinPosAxisC=th6;
+	}
+	
+return;
+close;
+//============================================
+
+

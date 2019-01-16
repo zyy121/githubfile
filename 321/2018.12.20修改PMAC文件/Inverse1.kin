@@ -1,0 +1,163 @@
+////====================================================================================
+//// Power PMAC Script Inverse Kinematic Program (.kin)
+//// Folder: "PMAC Script Language\Kinematic Routines"
+////====================================================================================
+//   // Put Coordinate System number inside "(cs)"
+open inverse(1)
+local r_11,r_12,r_13,r_21,r_22,r_23,r_31,r_32,r_33;
+local Px,Py,Pz;
+local ay1,ax1,C_1,r_1,throu,th11,th12;
+local th51,th52;
+local th61,th62;
+local th234,th2340,th2341,th2342;
+local mmm,nnn,d_2,rz2,throu2,th21,th22,th2j3;
+if(cs==1)
+{
+r_11=cosd(KinPosAxisC)*cosd(KinPosAxisB);
+r_12=sind(KinPosAxisA)*sind(KinPosAxisB)*cosd(KinPosAxisC)-sind(KinPosAxisC)*cosd(KinPosAxisA);
+r_13=cosd(KinPosAxisA)*sind(KinPosAxisB)*cosd(KinPosAxisC)+sind(KinPosAxisA)*sind(KinPosAxisC);
+r_21=cosd(KinPosAxisB)*sind(KinPosAxisC);
+r_22=sind(KinPosAxisA)*sind(KinPosAxisB)*sind(KinPosAxisC)+cosd(KinPosAxisA)*cosd(KinPosAxisC);
+r_23=cosd(KinPosAxisA)*sind(KinPosAxisB)*sind(KinPosAxisC)-sind(KinPosAxisA)*cosd(KinPosAxisC);
+r_31=-sind(KinPosAxisB);
+r_32=sind(KinPosAxisA)*cosd(KinPosAxisB);
+r_33=cosd(KinPosAxisA)*cosd(KinPosAxisB);
+
+Px=KinPosAxisX;
+Py=KinPosAxisY;
+Pz=KinPosAxisZ;
+if(Px*Px+Py*Py+Pz*Pz>=753693)
+{
+errorflag=1;
+}
+ay1=Py-dd_6*r_23;
+ax1=dd_6*r_13-Px;
+C_1=dd_3-dd_2-dd_4;
+r_1=sqrt((ax1)*(ax1)+(ay1)*(ay1));
+//%%反解角1
+throu=atan2d(ay1,ax1);
+th11=atan2d(C_1,sqrt(abs(r_1*r_1-C_1*C_1)))-throu;
+th12=atan2d(C_1,-sqrt(abs(r_1*r_1-C_1*C_1)))-throu;
+//%if th11 不在范围
+if (th11>180){th11=th11-360;}
+if (th11<=-180){th11=th11+360;}
+//%if th12 不在范围
+if (th12>180){th12=th12-360;}
+if (th12<=-180){th12=th12+360;}
+//%选值
+if (abs(th11-ttt1)<=abs(th12-ttt1)){theta1=th11;}
+else {theta1=th12;}
+
+//%%反解角5
+th51=atan2d(sqrt(1-(cosd(theta1)*r_23-sind(theta1)*r_13)*(cosd(theta1)*r_23-sind(theta1)*r_13)),-cosd(theta1)*r_23+sind(theta1)*r_13);
+th52=atan2d(-sqrt(1-(cosd(theta1)*r_23-sind(theta1)*r_13)*(cosd(theta1)*r_23-sind(theta1)*r_13)),-cosd(theta1)*r_23+sind(theta1)*r_13);
+//%if th51 不在范围
+if (th51>180){th51=th51-360;}
+if (th51<=-180){th51=th51+360;}
+//%if th52 不在范围
+if (th52>180){th52=th52-360;}
+if (th52<=-180){th52=th52+360;}
+//%选值
+if (abs(th51-ttt5)<=abs(th52-ttt5)){theta5=th51;}
+else {theta5=th52;}
+
+//%%反解角6
+th61=atan2d(sind(theta1)*r_12-cosd(theta1)*r_22,cosd(theta1)*r_21-sind(theta1)*r_11);
+th62=th61+180;
+//%if theta6 不在范围
+if (th61>180){th61=th61-360;}
+if (th61<=-180){th61=th61+360;}
+if (th62>180){th62=th62-360;}
+if (th62<=-180){th62=th62+360;}
+//%选值
+if (abs(th61-ttt6)<=abs(th62-ttt6)){theta6=th61;}
+else {theta6=th62;}
+//%反解角2-角3+角4
+th2341=atan2d(r_33,(cosd(theta1)*r_13+sind(theta1)*r_23));
+th2342=th2341+180;
+if (th2341>180){th2341=th2341-360;}
+if (th2341<-180){th2341=th2341+360;}
+if (th2342>180){th2342=th2342-360;}
+if (th2342<-180){th2342=th2342+360;}
+//%选解
+th2340=ttt2-ttt3+ttt4;
+if (th2340>180){th2340=th2340-360;}
+if (th2340<-180){th2340=th2340+360;}
+if (abs(th2341-th2340)<=abs(th2342-th2340)){th234=th2341;}
+else {th234=th2342;}
+mmm=dd_5*sind(th234)-dd_6*cosd(th234)*sind(theta5)+cosd(theta1)*Px+sind(theta1)*Py;
+nnn=-dd_6*sind(th234)*sind(theta5)-dd_5*cosd(th234)+Pz-dd_1;
+d_2=(mmm*mmm+nnn*nnn+aa_2*aa_2-aa_3*aa_3)/(2*aa_2);
+rz2=sqrt(mmm*mmm+nnn*nnn);
+throu2=atan2d(mmm,nnn);
+//%反解角2
+th21=atan2d(d_2,sqrt(abs(rz2*rz2-d_2*d_2)))-throu2;
+th22=atan2d(d_2,-sqrt(abs(rz2*rz2-d_2*d_2)))-throu2;
+//%if th21 不在范围
+if (th21-90>180){th21=th21-360;}
+if (th21-90<=-180){th21=th21+360;}
+//%if th22 不在范围
+if (th22-90>180){th22=th22-360;}
+if (th22-90<=-180){th22=th22+360;}
+//%选值
+if (abs(th21-ttt2)<=abs(th22-ttt2)){theta2=th21;}
+else {theta2=th22;}
+//%顺便求角3
+th2j3=atan2d(nnn-aa_2*sind(theta2),mmm-aa_2*cosd(theta2));
+theta3=theta2-th2j3;
+//%if theta3 不在范围
+if (theta3>180){theta3=theta3-360;}
+if (theta3<=-180){theta3=theta3+360;}
+//%反解角4
+theta4=th234-th2j3;
+//%if theta4 不在范围
+if (theta4+90>180){theta4=theta4-360;}
+if (theta4+90<=-180){theta4=theta4+360;}
+
+//新加
+fpx=136*sind(theta1) + 385*cosd(theta1)*cosd(theta2) + (201*cosd(theta5)*sind(theta1))/2 + 352*cosd(theta1)*sind(theta2)*sind(theta3) - 113*cosd(theta2 - theta3)*cosd(theta1)*sind(theta4) - 113*sind(theta2 - theta3)*cosd(theta1)*cosd(theta4) + (201*cosd(theta2 - theta3 + theta4)*cosd(theta1)*sind(theta5))/2 + 352*cosd(theta1)*cosd(theta2)*cosd(theta3);
+fpy=385*cosd(theta2)*sind(theta1) - (201*cosd(theta1)*cosd(theta5))/2 - 136*cosd(theta1) + 352*sind(theta1)*sind(theta2)*sind(theta3) - 113*cosd(theta2 - theta3)*sind(theta1)*sind(theta4) - 113*sind(theta2 - theta3)*cosd(theta4)*sind(theta1) + (201*cosd(theta2 - theta3 + theta4)*sind(theta1)*sind(theta5))/2 + 352*cosd(theta2)*cosd(theta3)*sind(theta1);
+fpz=352*sind(theta2 - theta3) + 385*sind(theta2) + 113*cosd(theta2 - theta3)*cosd(theta4) + sind(theta5)*((201*cosd(theta2 - theta3)*sind(theta4))/2 + (201*sind(theta2 - theta3)*cosd(theta4))/2) - 113*sind(theta2 - theta3)*sind(theta4) + 2847/20;
+frc=atan2d(cosd(theta6)*(cosd(theta1)*sind(theta5) + cosd(theta2 - theta3 + theta4)*cosd(theta5)*sind(theta1)) - sind(theta2 - theta3 + theta4)*sind(theta1)*sind(theta6),- cosd(theta6)*(sind(theta1)*sind(theta5) - cosd(theta2 - theta3 + theta4)*cosd(theta1)*cosd(theta5)) - sind(theta2 - theta3 + theta4)*cosd(theta1)*sind(theta6));
+fra=atan2d(- cosd(theta2 - theta3 + theta4)*sind(theta6) - sind(theta2 - theta3 + theta4)*cosd(theta5)*cosd(theta6),(- cosd(theta6)*(sind(theta1)*sind(theta5) - cosd(theta2 - theta3 + theta4)*cosd(theta1)*cosd(theta5)) - sind(theta2 - theta3 + theta4)*cosd(theta1)*sind(theta6))*cos(frc)-(cosd(theta6)*(cosd(theta1)*sind(theta5) + cosd(theta2 - theta3 + theta4)*cosd(theta5)*sind(theta1)) - sind(theta2 - theta3 + theta4)*sind(theta1)*sind(theta6))*sin(frc));
+frb=atan2d((cosd(theta5)*sind(theta1) + cosd(theta2 - theta3 + theta4)*cosd(theta1)*sind(theta5))*sin(frc)-(cosd(theta2 - theta3 + theta4)*sind(theta1)*sind(theta5) - cosd(theta1)*cosd(theta5)*cos(frc)),(- sind(theta6)*(cosd(theta1)*sind(theta5) + cosd(theta2 - theta3 + theta4)*cosd(theta5)*sind(theta1)) - sind(theta2 - theta3 + theta4)*cosd(theta6)*sind(theta1))*cos(frc)-(sind(theta6)*(sind(theta1)*sind(theta5) - cosd(theta2 - theta3 + theta4)*cosd(theta1)*cosd(theta5)) - sind(theta2 - theta3 + theta4)*cosd(theta1)*cosd(theta6))*sin(frc));
+temp=abs(fpx-Px)+abs(fpy -Py)+abs(fpz-Pz)+abs(fra-KinPosAxisA)+abs(frb-KinPosAxisB)+abs(frc-KinPosAxisC)
+if(temp>0.00001)
+{
+errorflag=1;
+}
+//新加结束
+
+theta2=theta2-90;
+theta4=theta4+90;
+theta6=theta6-90;
+
+if(theta3==0)
+{
+errorflag=1;
+}
+
+KinPosMotor1=theta1*CtsPerDeg1;
+KinPosMotor2=theta2*CtsPerDeg2;
+KinPosMotor3=theta3*CtsPerDeg3;
+KinPosMotor4=theta4*CtsPerDeg4;
+KinPosMotor5=theta5*CtsPerDeg5;
+KinPosMotor6=theta6*CtsPerDeg6;
+}
+if(cs==0)
+{
+KinPosMotor1=KinPosAxisX*CtsPerDeg1;
+KinPosMotor2=KinPosAxisY*CtsPerDeg2;
+KinPosMotor3=KinPosAxisZ*CtsPerDeg3;
+KinPosMotor4=KinPosAxisA*CtsPerDeg4;
+KinPosMotor5=KinPosAxisB*CtsPerDeg5;
+KinPosMotor6=KinPosAxisC*CtsPerDeg6;
+}
+close
+
+
+
+
+
+
+////====================================================================================
